@@ -2,7 +2,7 @@
 
 import pygame
 import sys
-from typing import List, Tuple, Any
+from typing import List, Any
 from flappy_bird.bird import Bird
 from flappy_bird.pipe import Pipe
 from flappy_bird.graphics import draw_background_elements, draw_ground, draw_start_screen, draw_game_over_screen
@@ -58,7 +58,6 @@ def main() -> None:
     pipes: List[Pipe] = []
     score: int = 0
     last_pipe: int = pygame.time.get_ticks()
-    passed_pipe_index: int = 0  # Index of the last pipe that the bird passed
     game_state: str = "start"  # "start", "playing", "game_over"
 
     running: bool = True
@@ -79,7 +78,6 @@ def main() -> None:
                         pipes = []
                         score = 0
                         last_pipe = pygame.time.get_ticks()
-                        passed_pipe_index = 0
                         game_state = "playing"
                 if event.key == pygame.K_r and game_state == "game_over":
                     # Restart the game
@@ -87,7 +85,6 @@ def main() -> None:
                     pipes = []
                     score = 0
                     last_pipe = pygame.time.get_ticks()
-                    passed_pipe_index = 0
                     game_state = "playing"
 
         # Fill the screen with current biome's sky color
