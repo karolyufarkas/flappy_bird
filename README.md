@@ -74,3 +74,19 @@ python -m build
 ```
 
 This will create `dist/` directory with the built packages.
+
+## CI/CD
+
+This project uses GitHub Actions for continuous integration:
+
+- **CI**: Runs tests on multiple Python versions (3.8-3.12) on pushes and PRs to main branch
+- **Cross Platform Tests**: Runs tests on multiple platforms (Ubuntu, Windows, macOS)
+- **Publish**: Automatically publishes to PyPI on new releases
+
+## Contributing
+
+1. Fork the repository
+2. Create a virtual environment: `python -m venv venv`
+3. Activate it: `source venv/bin/activate` (Linux/Mac) or `venv\Scripts\activate` (Windows)
+4. Install in editable mode: `pip install -e ".[dev]"`
+5. Run tests: `pytest tests/`
