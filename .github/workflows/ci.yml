@@ -34,6 +34,11 @@ jobs:
         # Exit-zero treats all errors as warnings
         flake8 src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
         
+    - name: Type check with mypy
+      run: |
+        pip install mypy
+        mypy src/flappy_bird --package flappy_bird
+        
     - name: Test with pytest
       run: |
         pip install pytest

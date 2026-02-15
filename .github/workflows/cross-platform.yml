@@ -27,6 +27,11 @@ jobs:
         pip install pygame numpy
         pip install -e .
         
+    - name: Type check with mypy
+      run: |
+        pip install mypy
+        mypy src/flappy_bird --package flappy_bird
+        
     - name: Test with pytest
       run: |
         pip install pytest
