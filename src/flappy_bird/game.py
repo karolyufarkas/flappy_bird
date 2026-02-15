@@ -2,7 +2,6 @@
 
 import pygame
 import sys
-import random
 from typing import List, Tuple, Any
 from flappy_bird.bird import Bird
 from flappy_bird.pipe import Pipe
@@ -52,19 +51,7 @@ def main() -> None:
         font = pygame.font.SysFont('arial', 24)
     except (pygame.error, NotImplementedError):
         # If font module is not available, try loading a default font
-        try:
-            font = pygame.font.Font(None, 24)  # Use default font
-        except (pygame.error, NotImplementedError):
-            # If no font is available, create a dummy font object
-            class DummyFont:
-                def render(self, text: str, antialias: bool, color: Tuple[int, int, int]) -> pygame.Surface:
-                    # Return a dummy surface
-                    surf = pygame.Surface((100, 30))
-                    surf.fill((0, 0, 0))
-                    return surf
-                def size(self, text: str) -> Tuple[int, int]:
-                    return (100, 30)
-            font = DummyFont()
+        font = pygame.font.Font(None, 24)  # Use default font
 
     # Sound mixer is handled in the sounds module
     bird = Bird()

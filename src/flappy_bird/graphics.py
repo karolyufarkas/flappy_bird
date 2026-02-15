@@ -5,7 +5,8 @@ from typing import Dict, Tuple
 from flappy_bird.constants import BIOMES, BIOME_INTERVAL, SCREEN_WIDTH, SCREEN_HEIGHT, GROUND_HEIGHT, WHITE, YELLOW
 
 
-def draw_background_elements(surface: pygame.Surface, biome_colors: Dict[str, Tuple[int, int, int]], score: int, elapsed_time: int) -> None:
+def draw_background_elements(surface: pygame.Surface, biome_colors: Dict[str, Tuple[int, int, int]], score: int,
+                             elapsed_time: int) -> None:
     """Draw background elements based on the current biome"""
     biome_index = (score // BIOME_INTERVAL) % len(BIOMES)
 
@@ -32,7 +33,8 @@ def draw_background_elements(surface: pygame.Surface, biome_colors: Dict[str, Tu
         # Draw large trees that span the entire screen height with trunks at bottom and canopy at top
         for i in range(10):  # More trees to ensure continuous coverage as they move
             # Calculate tree position with smooth movement based on time
-            x_pos = (i * 100 - elapsed_time * 0.05) % (SCREEN_WIDTH + 500) - 100  # Trees move backward based on time, faster movement
+            x_pos = (i * 100 - elapsed_time * 0.05) % (
+                        SCREEN_WIDTH + 500) - 100  # Trees move backward based on time, faster movement
             # Only draw trees that are visible on screen
             if -50 <= x_pos <= SCREEN_WIDTH + 50:
                 # Very tall tree trunk that spans most of the screen
@@ -48,17 +50,19 @@ def draw_background_elements(surface: pygame.Surface, biome_colors: Dict[str, Tu
                 canopy_surf.set_colorkey((0, 0, 0))  # Make black transparent
                 # Create a more organic canopy shape using multiple overlapping circles
                 pygame.draw.circle(canopy_surf, (34, 139, 34), (75, 100), 60)  # Center
-                pygame.draw.circle(canopy_surf, (34, 150, 34), (40, 70), 50)   # Left
+                pygame.draw.circle(canopy_surf, (34, 150, 34), (40, 70), 50)  # Left
                 pygame.draw.circle(canopy_surf, (50, 180, 50), (110, 70), 50)  # Right
-                pygame.draw.circle(canopy_surf, (34, 145, 34), (25, 40), 40)   # Far left
+                pygame.draw.circle(canopy_surf, (34, 145, 34), (25, 40), 40)  # Far left
                 pygame.draw.circle(canopy_surf, (40, 155, 40), (125, 40), 40)  # Far right
-                surface.blit(canopy_surf, (int(x_pos - 35), 0))  # Position at top of screen, cast to int for smooth movement
+                surface.blit(canopy_surf,
+                             (int(x_pos - 35), 0))  # Position at top of screen, cast to int for smooth movement
 
     elif biome_index == 1:  # Evening biome - trees
         # Draw large trees that span the entire screen height with trunks at bottom and canopy at top
         for i in range(10):  # More trees to ensure continuous coverage as they move
             # Calculate tree position with smooth movement based on time
-            x_pos = (i * 100 - elapsed_time * 0.05) % (SCREEN_WIDTH + 500) - 100  # Trees move backward based on time, faster movement
+            x_pos = (i * 100 - elapsed_time * 0.05) % (
+                        SCREEN_WIDTH + 500) - 100  # Trees move backward based on time, faster movement
             # Only draw trees that are visible on screen
             if -50 <= x_pos <= SCREEN_WIDTH + 50:
                 # Very tall tree trunk that spans most of the screen
@@ -74,11 +78,12 @@ def draw_background_elements(surface: pygame.Surface, biome_colors: Dict[str, Tu
                 canopy_surf.set_colorkey((0, 0, 0))  # Make black transparent
                 # Create a more organic canopy shape using multiple overlapping circles
                 pygame.draw.circle(canopy_surf, (34, 100, 34), (75, 100), 60)  # Center
-                pygame.draw.circle(canopy_surf, (34, 90, 34), (40, 70), 50)    # Left
+                pygame.draw.circle(canopy_surf, (34, 90, 34), (40, 70), 50)  # Left
                 pygame.draw.circle(canopy_surf, (40, 120, 40), (110, 70), 50)  # Right
-                pygame.draw.circle(canopy_surf, (34, 105, 34), (25, 40), 40)   # Far left
+                pygame.draw.circle(canopy_surf, (34, 105, 34), (25, 40), 40)  # Far left
                 pygame.draw.circle(canopy_surf, (40, 115, 40), (125, 40), 40)  # Far right
-                surface.blit(canopy_surf, (int(x_pos - 35), 0))  # Position at top of screen, cast to int for smooth movement
+                surface.blit(canopy_surf,
+                             (int(x_pos - 35), 0))  # Position at top of screen, cast to int for smooth movement
 
     elif biome_index == 2:  # Desert biome - cacti
         # Draw some cacti in the background with transparency
@@ -124,7 +129,8 @@ def draw_background_elements(surface: pygame.Surface, biome_colors: Dict[str, Tu
 
 
 def draw_ground(surface: pygame.Surface, biome_colors: Dict[str, Tuple[int, int, int]]) -> None:
-    pygame.draw.rect(surface, biome_colors["ground_color"], (0, SCREEN_HEIGHT - GROUND_HEIGHT, SCREEN_WIDTH, GROUND_HEIGHT))
+    pygame.draw.rect(surface, biome_colors["ground_color"],
+                     (0, SCREEN_HEIGHT - GROUND_HEIGHT, SCREEN_WIDTH, GROUND_HEIGHT))
     # Draw grass on top of ground
     pygame.draw.rect(surface, biome_colors["grass_color"], (0, SCREEN_HEIGHT - GROUND_HEIGHT, SCREEN_WIDTH, 15))
 
@@ -134,8 +140,8 @@ def draw_start_screen(surface: pygame.Surface, font: pygame.font.Font) -> None:
     title_text = title_font.render("FLAPPY BIRD", True, WHITE)
     instruction_text = font.render("Press SPACE to Start", True, WHITE)
 
-    surface.blit(title_text, (SCREEN_WIDTH//2 - title_text.get_width()//2, SCREEN_HEIGHT//2 - 50))
-    surface.blit(instruction_text, (SCREEN_WIDTH//2 - instruction_text.get_width()//2, SCREEN_HEIGHT//2 + 20))
+    surface.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 2 - 50))
+    surface.blit(instruction_text, (SCREEN_WIDTH // 2 - instruction_text.get_width() // 2, SCREEN_HEIGHT // 2 + 20))
 
 
 def draw_game_over_screen(surface: pygame.Surface, score: int, font: pygame.font.Font) -> None:
@@ -144,6 +150,6 @@ def draw_game_over_screen(surface: pygame.Surface, score: int, font: pygame.font
     score_text = font.render(f"Score: {score}", True, WHITE)
     restart_text = font.render("Press R to Restart", True, WHITE)
 
-    surface.blit(title_text, (SCREEN_WIDTH//2 - title_text.get_width()//2, SCREEN_HEIGHT//2 - 60))
-    surface.blit(score_text, (SCREEN_WIDTH//2 - score_text.get_width()//2, SCREEN_HEIGHT//2))
-    surface.blit(restart_text, (SCREEN_WIDTH//2 - restart_text.get_width()//2, SCREEN_HEIGHT//2 + 40))
+    surface.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 2 - 60))
+    surface.blit(score_text, (SCREEN_WIDTH // 2 - score_text.get_width() // 2, SCREEN_HEIGHT // 2))
+    surface.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 40))

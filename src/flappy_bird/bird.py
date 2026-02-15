@@ -1,7 +1,6 @@
 """Bird class for Flappy Bird"""
 
 import pygame
-from typing import Tuple
 from flappy_bird.constants import FLAP_STRENGTH, GRAVITY, SCREEN_HEIGHT, GROUND_HEIGHT, YELLOW, BLACK, ORANGE
 from flappy_bird.sounds import flap_sound
 
