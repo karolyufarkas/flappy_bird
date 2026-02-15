@@ -1,19 +1,21 @@
 """Constants for Flappy Bird"""
 
+from typing import Tuple, List, Dict, Any
+
 # Game constants
-SCREEN_WIDTH = 400
-SCREEN_HEIGHT = 600
-GRAVITY = 0.25
-FLAP_STRENGTH = -5
-PIPE_GAP = 150
-BASE_PIPE_SPEED = 3
-PIPE_FREQUENCY = 1800  # milliseconds
-GROUND_HEIGHT = 100
-DIFFICULTY_INCREMENT = 0.2  # Speed increase per 5 points
+SCREEN_WIDTH: int = 400
+SCREEN_HEIGHT: int = 600
+GRAVITY: float = 0.25
+FLAP_STRENGTH: int = -5
+PIPE_GAP: int = 150
+BASE_PIPE_SPEED: int = 3
+PIPE_FREQUENCY: int = 1800  # milliseconds
+GROUND_HEIGHT: int = 100
+DIFFICULTY_INCREMENT: float = 0.2  # Speed increase per 5 points
 
 # Biome constants
-BIOME_INTERVAL = 10  # Change biome every 10 points
-BIOMES = [
+BIOME_INTERVAL: int = 10  # Change biome every 10 points
+BIOMES: List[Dict[str, Tuple[int, int, int]]] = [
     {  # Day biome (default)
         "sky_color": (135, 206, 235),  # Sky blue
         "pipe_color": (34, 139, 34),   # Forest green
@@ -45,11 +47,11 @@ BIOMES = [
 ]
 
 # Colors
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-BLUE = (135, 206, 235)  # Sky blue (will be replaced by biome)
-GREEN = (0, 200, 0)     # Will be replaced by biome
-DARK_GREEN = (0, 150, 0) # Will be replaced by biome
-YELLOW = (255, 255, 0)
-ORANGE = (255, 165, 0)
-BROWN = (139, 69, 19)   # Will be replaced by biome
+WHITE: Tuple[int, int, int] = (255, 255, 255)
+BLACK: Tuple[int, int, int] = (0, 0, 0)
+BLUE: Tuple[int, int, int] = (135, 206, 235)  # Sky blue (will be replaced by biome)
+GREEN: Tuple[int, int, int] = (0, 200, 0)     # Will be replaced by biome
+DARK_GREEN: Tuple[int, int, int] = (0, 150, 0) # Will be replaced by biome
+YELLOW: Tuple[int, int, int] = (255, 255, 0)
+ORANGE: Tuple[int, int, int] = (255, 165, 0)
+BROWN: Tuple[int, int, int] = (139, 69, 19)   # Will be replaced by biome

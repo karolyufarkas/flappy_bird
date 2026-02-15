@@ -1,10 +1,11 @@
 """Graphics functions for Flappy Bird"""
 
 import pygame
+from typing import Dict, Tuple
 from flappy_bird.constants import BIOMES, BIOME_INTERVAL, SCREEN_WIDTH, SCREEN_HEIGHT, GROUND_HEIGHT, WHITE, YELLOW
 
 
-def draw_background_elements(surface, biome_colors, score, elapsed_time):
+def draw_background_elements(surface: pygame.Surface, biome_colors: Dict[str, Tuple[int, int, int]], score: int, elapsed_time: int) -> None:
     """Draw background elements based on the current biome"""
     biome_index = (score // BIOME_INTERVAL) % len(BIOMES)
 
@@ -122,13 +123,13 @@ def draw_background_elements(surface, biome_colors, score, elapsed_time):
             surface.blit(snow_surf, (x_pos + 30, SCREEN_HEIGHT - GROUND_HEIGHT - 80))
 
 
-def draw_ground(surface, biome_colors):
+def draw_ground(surface: pygame.Surface, biome_colors: Dict[str, Tuple[int, int, int]]) -> None:
     pygame.draw.rect(surface, biome_colors["ground_color"], (0, SCREEN_HEIGHT - GROUND_HEIGHT, SCREEN_WIDTH, GROUND_HEIGHT))
     # Draw grass on top of ground
     pygame.draw.rect(surface, biome_colors["grass_color"], (0, SCREEN_HEIGHT - GROUND_HEIGHT, SCREEN_WIDTH, 15))
 
 
-def draw_start_screen(surface, font):
+def draw_start_screen(surface: pygame.Surface, font: pygame.font.Font) -> None:
     title_font = pygame.font.SysFont('arial', 36)
     title_text = title_font.render("FLAPPY BIRD", True, WHITE)
     instruction_text = font.render("Press SPACE to Start", True, WHITE)
@@ -137,7 +138,7 @@ def draw_start_screen(surface, font):
     surface.blit(instruction_text, (SCREEN_WIDTH//2 - instruction_text.get_width()//2, SCREEN_HEIGHT//2 + 20))
 
 
-def draw_game_over_screen(surface, score, font):
+def draw_game_over_screen(surface: pygame.Surface, score: int, font: pygame.font.Font) -> None:
     title_font = pygame.font.SysFont('arial', 36)
     title_text = title_font.render("GAME OVER", True, WHITE)
     score_text = font.render(f"Score: {score}", True, WHITE)

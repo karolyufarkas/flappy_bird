@@ -38,6 +38,7 @@ Skill: I'll help you create __init__.py files, setup.py, and proper import struc
 - Maintainable Code: Organized structure that's easy to extend and modify
 - Import Management: Use absolute imports for clarity and to avoid issues with package structure
 - Avoid Relative Imports: Prefer absolute imports over relative imports for better clarity and fewer import-related issues
+- Type Hints: Always include type hints for function parameters and return values to improve code clarity and catch errors early
 - Documentation: Clear README and docstrings for each module
 
 ## Common Module Types
