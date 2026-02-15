@@ -3,16 +3,23 @@
 import pygame
 from typing import Any
 
+# Define dummy sound objects if mixer is not available
+class DummySound:
+    def play(self) -> None: pass
+
+# Global variables for sounds
+flap_sound: Any
+hit_sound: Any
+point_sound: Any
+
 # Since pygame.sndarray might not be available, create a fallback
 try:
     # Check if pygame.mixer is available
     if not hasattr(pygame, 'mixer') or not pygame.mixer.get_init():
         # Define dummy sound objects if mixer is not available
-        class DummySound:
-            def play(self) -> None: pass
-        flap_sound: Any = DummySound()
-        hit_sound: Any = DummySound()
-        point_sound: Any = DummySound()
+        flap_sound = DummySound()
+        hit_sound = DummySound()
+        point_sound = DummySound()
     else:
         import numpy
         # Create more complex sound effects programmatically
@@ -132,14 +139,12 @@ try:
         # Initialize sounds
         if pygame.sndarray.get_arraytype() != 'numpy':
             raise ImportError("sndarray not available")
-        flap_sound: Any = create_flap_sound()
-        hit_sound: Any = create_hit_sound()
-        point_sound: Any = create_point_sound()
+        flap_sound = create_flap_sound()
+        hit_sound = create_hit_sound()
+        point_sound = create_point_sound()
         
 except (ImportError, AttributeError, NotImplementedError):
     # Fallback if numpy, sndarray, or mixer isn't available
-    class DummySound:
-        def play(self) -> None: pass
-    flap_sound: Any = DummySound()
-    hit_sound: Any = DummySound()
-    point_sound: Any = DummySound()
+    flap_sound = DummySound()
+    hit_sound = DummySound()
+    point_sound = DummySound()

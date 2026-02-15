@@ -3,7 +3,7 @@
 import pygame
 import sys
 import random
-from typing import List, Tuple
+from typing import List, Tuple, Any
 from flappy_bird.bird import Bird
 from flappy_bird.pipe import Pipe
 from flappy_bird.graphics import draw_background_elements, draw_ground, draw_start_screen, draw_game_over_screen
@@ -47,6 +47,7 @@ def main() -> None:
     clock = pygame.time.Clock()
 
     # Font - with fallback for systems where font module is not available
+    font: Any
     try:
         font = pygame.font.SysFont('arial', 24)
     except (pygame.error, NotImplementedError):
@@ -56,12 +57,12 @@ def main() -> None:
         except (pygame.error, NotImplementedError):
             # If no font is available, create a dummy font object
             class DummyFont:
-                def render(self, text: str, antialias: bool, color: Tuple[int, int, int]):
+                def render(self, text: str, antialias: bool, color: Tuple[int, int, int]) -> pygame.Surface:
                     # Return a dummy surface
                     surf = pygame.Surface((100, 30))
                     surf.fill((0, 0, 0))
                     return surf
-                def size(self, text: str):
+                def size(self, text: str) -> Tuple[int, int]:
                     return (100, 30)
             font = DummyFont()
 
