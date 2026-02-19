@@ -2,21 +2,21 @@
 
 import pygame
 import random
-from typing import Dict, Tuple, Optional, TYPE_CHECKING
-from flappy_bird.constants import SCREEN_WIDTH, SCREEN_HEIGHT, PIPE_GAP, GROUND_HEIGHT, BIOMES
+from typing import Dict, Optional, TYPE_CHECKING
+from flappy_bird.constants import SCREEN_WIDTH, SCREEN_HEIGHT, PIPE_GAP, GROUND_HEIGHT, BIOMES, Color
 
 if TYPE_CHECKING:
     from flappy_bird.bird import Bird
 
 
 class Pipe:
-    def __init__(self, biome_colors: Optional[Dict[str, Tuple[int, int, int]]] = None) -> None:
+    def __init__(self, biome_colors: Optional[Dict[str, Color]] = None) -> None:
         self.x: float = float(SCREEN_WIDTH)
         self.height: int = random.randint(150, SCREEN_HEIGHT - GROUND_HEIGHT - PIPE_GAP - 50)
         self.top_pipe: pygame.Rect = pygame.Rect(int(self.x), 0, 60, self.height)
         self.bottom_pipe: pygame.Rect = pygame.Rect(int(self.x), self.height + PIPE_GAP, 60, SCREEN_HEIGHT)
         self.passed: bool = False
-        self.biome_colors: Dict[str, Tuple[int, int, int]] = biome_colors or BIOMES[0]  # Default to day biome
+        self.biome_colors: Dict[str, Color] = biome_colors or BIOMES[0]  # Default to day biome
 
     def update(self, pipe_speed: float) -> None:
         self.x -= pipe_speed

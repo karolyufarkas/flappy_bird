@@ -1,11 +1,11 @@
 """Graphics functions for Flappy Bird"""
 
 import pygame
-from typing import Dict, Tuple
-from flappy_bird.constants import BIOMES, BIOME_INTERVAL, SCREEN_WIDTH, SCREEN_HEIGHT, GROUND_HEIGHT, WHITE, YELLOW
+from typing import Dict
+from flappy_bird.constants import BIOMES, BIOME_INTERVAL, SCREEN_WIDTH, SCREEN_HEIGHT, GROUND_HEIGHT, WHITE, YELLOW, Color
 
 
-def draw_background_elements(surface: pygame.Surface, biome_colors: Dict[str, Tuple[int, int, int]], score: int,
+def draw_background_elements(surface: pygame.Surface, biome_colors: Dict[str, Color], score: int,
                              elapsed_time: int) -> None:
     """Draw background elements based on the current biome"""
     biome_index = (score // BIOME_INTERVAL) % len(BIOMES)
@@ -128,7 +128,7 @@ def draw_background_elements(surface: pygame.Surface, biome_colors: Dict[str, Tu
             surface.blit(snow_surf, (x_pos + 30, SCREEN_HEIGHT - GROUND_HEIGHT - 80))
 
 
-def draw_ground(surface: pygame.Surface, biome_colors: Dict[str, Tuple[int, int, int]]) -> None:
+def draw_ground(surface: pygame.Surface, biome_colors: Dict[str, Color]) -> None:
     pygame.draw.rect(surface, biome_colors["ground_color"],
                      (0, SCREEN_HEIGHT - GROUND_HEIGHT, SCREEN_WIDTH, GROUND_HEIGHT))
     # Draw grass on top of ground
