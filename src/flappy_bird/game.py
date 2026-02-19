@@ -2,7 +2,7 @@
 
 import pygame
 import sys
-import random
+from typing import List, Any
 from flappy_bird.bird import Bird
 from flappy_bird.pipe import Pipe
 from flappy_bird.graphics import draw_background_elements, draw_ground, draw_start_screen, draw_game_over_screen
@@ -10,7 +10,7 @@ from flappy_bird.sounds import hit_sound, point_sound
 from flappy_bird.constants import BIOMES, BIOME_INTERVAL, PIPE_FREQUENCY, BASE_PIPE_SPEED, DIFFICULTY_INCREMENT, SCREEN_WIDTH, GROUND_HEIGHT, SCREEN_HEIGHT
 
 
-def check_collision(bird, pipes):
+def check_collision(bird: Bird, pipes: List[Pipe]) -> bool:
     # Check collision with ground or ceiling
     if bird.y >= SCREEN_HEIGHT - GROUND_HEIGHT - bird.radius or bird.y <= bird.radius:
         return True
@@ -23,20 +23,20 @@ def check_collision(bird, pipes):
     return False
 
 
-def get_current_biome(score):
+def get_current_biome(score: int):
     """Get the current biome based on the score"""
     biome_index = (score // BIOME_INTERVAL) % len(BIOMES)
     return BIOMES[biome_index]
 
 
-def get_current_pipe_speed(score):
+def get_current_pipe_speed(score: int) -> float:
     """Calculate the current pipe speed based on the score"""
     # Increase speed every 5 points
     level = score // 5
     return BASE_PIPE_SPEED + (level * DIFFICULTY_INCREMENT)
 
 
-def main():
+def main() -> None:
     # Initialize pygame
     pygame.init()
 
@@ -46,33 +46,21 @@ def main():
     clock = pygame.time.Clock()
 
     # Font - with fallback for systems where font module is not available
+    font: Any
     try:
         font = pygame.font.SysFont('arial', 24)
     except (pygame.error, NotImplementedError):
         # If font module is not available, try loading a default font
-        try:
-            font = pygame.font.Font(None, 24)  # Use default font
-        except (pygame.error, NotImplementedError):
-            # If no font is available, create a dummy font object
-            class DummyFont:
-                def render(self, text, antialias, color):
-                    # Return a dummy surface
-                    surf = pygame.Surface((100, 30))
-                    surf.fill((0, 0, 0))
-                    return surf
-                def size(self, text):
-                    return (100, 30)
-            font = DummyFont()
+        font = pygame.font.Font(None, 24)  # Use default font
 
     # Sound mixer is handled in the sounds module
     bird = Bird()
-    pipes = []
-    score = 0
-    last_pipe = pygame.time.get_ticks()
-    passed_pipe_index = 0  # Index of the last pipe that the bird passed
-    game_state = "start"  # "start", "playing", "game_over"
+    pipes: List[Pipe] = []
+    score: int = 0
+    last_pipe: int = pygame.time.get_ticks()
+    game_state: str = "start"  # "start", "playing", "game_over"
 
-    running = True
+    running: bool = True
     while running:
         # Event handling
         for event in pygame.event.get():
@@ -90,7 +78,6 @@ def main():
                         pipes = []
                         score = 0
                         last_pipe = pygame.time.get_ticks()
-                        passed_pipe_index = 0
                         game_state = "playing"
                 if event.key == pygame.K_r and game_state == "game_over":
                     # Restart the game
@@ -98,7 +85,6 @@ def main():
                     pipes = []
                     score = 0
                     last_pipe = pygame.time.get_ticks()
-                    passed_pipe_index = 0
                     game_state = "playing"
 
         # Fill the screen with current biome's sky color
