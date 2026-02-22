@@ -37,14 +37,38 @@ class Bird:
             self.velocity = 0
             self.rotation = -90
 
-    def draw(self, surface: pygame.Surface) -> None:
+    def draw(self, surface: pygame.Surface, invincible: bool = False) -> None:
         # Create a surface for the bird with rotation
         bird_surface = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA)
-        pygame.draw.circle(bird_surface, YELLOW, (self.radius, self.radius), self.radius)
-        # Draw eye
-        pygame.draw.circle(bird_surface, BLACK, (self.radius + 8, self.radius - 5), 4)
-        # Draw beak
-        pygame.draw.polygon(bird_surface, ORANGE, [(self.radius + 10, self.radius),
+        
+        if invincible:
+            # Make bird semi-transparent when invincible (flashing effect)
+            # Flash every 200ms
+            if int(pygame.time.get_ticks() / 200) % 2 == 0:
+                # Draw semi-transparent bird (flashing)
+                pygame.draw.circle(bird_surface, (255, 255, 0, 128), (self.radius, self.radius), self.radius)
+                # Draw eye with transparency
+                pygame.draw.circle(bird_surface, (0, 0, 0, 128), (self.radius + 8, self.radius - 5), 4)
+                # Draw beak with transparency
+                pygame.draw.polygon(bird_surface, (255, 165, 0, 128), [(self.radius + 10, self.radius),
+                                                         (self.radius + 20, self.radius - 5),
+                                                         (self.radius + 20, self.radius + 5)])
+            else:
+                # Draw normal bird when not flashing
+                pygame.draw.circle(bird_surface, (255, 255, 0), (self.radius, self.radius), self.radius)
+                # Draw eye
+                pygame.draw.circle(bird_surface, (0, 0, 0), (self.radius + 8, self.radius - 5), 4)
+                # Draw beak
+                pygame.draw.polygon(bird_surface, (255, 165, 0), [(self.radius + 10, self.radius),
+                                                         (self.radius + 20, self.radius - 5),
+                                                         (self.radius + 20, self.radius + 5)])
+        else:
+            # Draw normal bird
+            pygame.draw.circle(bird_surface, (255, 255, 0), (self.radius, self.radius), self.radius)
+            # Draw eye
+            pygame.draw.circle(bird_surface, (0, 0, 0), (self.radius + 8, self.radius - 5), 4)
+            # Draw beak
+            pygame.draw.polygon(bird_surface, (255, 165, 0), [(self.radius + 10, self.radius),
                                                          (self.radius + 20, self.radius - 5),
                                                          (self.radius + 20, self.radius + 5)])
 

@@ -23,6 +23,87 @@ def check_collision(bird: Bird, pipes: List[Pipe]) -> bool:
     return False
 
 
+def draw_lives(surface: pygame.Surface, lives: float) -> None:
+    """Draw hearts to represent remaining lives (supports half hearts)"""
+    heart_color = (255, 0, 0)  # Red color for hearts
+    margin = 10
+    
+    full_hearts = int(lives)
+    has_half_heart = lives % 1 >= 0.5
+    
+    # Draw full hearts with complex symmetrical shape (smaller size)
+    for i in range(full_hearts):
+        x = SCREEN_WIDTH - margin - 20 - (i * 28)
+        y = margin + 10
+        
+        # Draw complex symmetrical heart - left side points
+        left_points = [
+            (x, y + 16),        # Bottom point (center)
+            (x - 2, y + 12),    # Lower curve left 1
+            (x - 4, y + 9),     # Lower curve left 2
+            (x - 6, y + 6),     # Lower left curve
+            (x - 8, y + 3),     # Left side lower
+            (x - 9, y + 0),     # Left side
+            (x - 10, y - 3),    # Left side middle
+            (x - 10, y - 6),    # Left side upper
+            (x - 9, y - 9),     # Left bump lower outer
+            (x - 8, y - 12),    # Left bump outer lower
+            (x - 6, y - 14),    # Left bump outer
+            (x - 4, y - 15),    # Left bump top outer
+            (x - 2, y - 14),    # Left bump top
+            (x - 1, y - 11),    # Left bump inner
+            (x, y - 8),         # Left side of center dip
+        ]
+        
+        # Right side points (mirror of left)
+        right_points = [
+            (x, y - 8),         # Right side of center dip
+            (x + 1, y - 11),    # Right bump inner
+            (x + 2, y - 14),    # Right bump top
+            (x + 4, y - 15),    # Right bump top outer
+            (x + 6, y - 14),    # Right bump outer
+            (x + 8, y - 12),    # Right bump outer lower
+            (x + 9, y - 9),     # Right bump lower outer
+            (x + 10, y - 6),    # Right side upper
+            (x + 10, y - 3),    # Right side middle
+            (x + 9, y + 0),     # Right side
+            (x + 8, y + 3),     # Right side lower
+            (x + 6, y + 6),     # Lower right curve
+            (x + 4, y + 9),     # Lower curve right 2
+            (x + 2, y + 12),    # Lower curve right 1
+        ]
+        
+        # Combine all points into one closed polygon
+        points = left_points + right_points
+        pygame.draw.polygon(surface, heart_color, points)
+    
+    # Draw half heart with complex symmetrical left half shape (smaller size)
+    if has_half_heart:
+        i = full_hearts
+        x = SCREEN_WIDTH - margin - 20 - (i * 28)
+        y = margin + 10
+        
+        # Draw left half of complex symmetrical heart (scaled down)
+        points = [
+            (x, y + 16),        # Bottom point (center line)
+            (x - 2, y + 12),    # Lower curve left 1
+            (x - 4, y + 9),     # Lower curve left 2
+            (x - 6, y + 6),     # Lower left curve
+            (x - 8, y + 3),     # Left side lower
+            (x - 9, y + 0),     # Left side
+            (x - 10, y - 3),    # Left side middle
+            (x - 10, y - 6),    # Left side upper
+            (x - 9, y - 9),     # Left bump lower outer
+            (x - 8, y - 12),    # Left bump outer lower
+            (x - 6, y - 14),    # Left bump outer
+            (x - 4, y - 15),    # Left bump top outer
+            (x - 2, y - 14),    # Left bump top
+            (x - 1, y - 11),    # Left bump inner
+            (x, y - 8),         # Center dip (on cut line)
+        ]
+        pygame.draw.polygon(surface, heart_color, points)
+
+
 def get_current_biome(score: int):
     """Get the current biome based on the score"""
     biome_index = (score // BIOME_INTERVAL) % len(BIOMES)
@@ -57,8 +138,17 @@ def main() -> None:
     bird = Bird()
     pipes: List[Pipe] = []
     score: int = 0
+    lives: float = 3.0  # Player starts with 3 lives (supports half hearts)
     last_pipe: int = pygame.time.get_ticks()
     game_state: str = "start"  # "start", "playing", "game_over"
+    invincible: bool = False  # Invincibility flag after getting hit
+    invincible_timer: int = 0  # Timer for invincibility (in milliseconds)
+    INVINCIBILITY_DURATION: int = 2000  # 2 seconds of invincibility
+    
+    # Fall damage system
+    max_height: float = SCREEN_HEIGHT // 2  # Track the highest point before falling
+    FALL_DAMAGE_THRESHOLD: float = 100  # Minimum fall distance to take damage
+    MAX_FALL_DAMAGE: float = 3.0  # Maximum damage from a single fall
 
     running: bool = True
     while running:
@@ -77,14 +167,22 @@ def main() -> None:
                         bird = Bird()
                         pipes = []
                         score = 0
+                        lives = 3.0  # Reset lives
+                        max_height = SCREEN_HEIGHT // 2  # Reset max height tracking
                         last_pipe = pygame.time.get_ticks()
+                        invincible = False
+                        invincible_timer = 0
                         game_state = "playing"
                 if event.key == pygame.K_r and game_state == "game_over":
                     # Restart the game
                     bird = Bird()
                     pipes = []
                     score = 0
+                    lives = 3.0  # Reset lives
+                    max_height = SCREEN_HEIGHT // 2  # Reset max height tracking
                     last_pipe = pygame.time.get_ticks()
+                    invincible = False
+                    invincible_timer = 0
                     game_state = "playing"
 
         # Fill the screen with current biome's sky color
@@ -99,8 +197,12 @@ def main() -> None:
             draw_start_screen(screen, font)
 
         elif game_state == "playing":
-            # Update bird
+            # Update bird and track maximum height
             bird.update()
+            
+            # Track the highest point (lowest y value) before falling
+            if bird.y < max_height:
+                max_height = bird.y
 
             # Calculate current pipe speed and biome based on score
             current_pipe_speed = get_current_pipe_speed(score)
@@ -118,10 +220,36 @@ def main() -> None:
                 if pipe.x < -60:  # Pipe is off screen
                     pipes.remove(pipe)
 
-            # Check for collisions
-            if check_collision(bird, pipes):
+            # Check for collisions (only if not invincible)
+            if not invincible and check_collision(bird, pipes):
                 hit_sound.play()  # Play hit sound
-                game_state = "game_over"
+                
+                # Calculate fall damage
+                fall_distance = bird.y - max_height
+                if fall_distance > FALL_DAMAGE_THRESHOLD:
+                    # Calculate damage based on fall distance (0.5 hearts per 100 pixels fallen, max 3)
+                    damage = min(int(fall_distance / 100) * 0.5 + 0.5, MAX_FALL_DAMAGE)
+                else:
+                    damage = 0.5  # Minimum 0.5 damage for any collision
+                
+                lives -= damage  # Lose lives based on damage
+                if lives <= 0:
+                    game_state = "game_over"  # Game over when no lives left
+                else:
+                    # Become invincible for a short period
+                    invincible = True
+                    invincible_timer = pygame.time.get_ticks()
+                    # Reset bird position
+                    bird.y = SCREEN_HEIGHT // 2
+                    bird.velocity = 0
+                    # Reset max height tracking
+                    max_height = bird.y
+
+            # Update invincibility timer
+            if invincible:
+                time_now = pygame.time.get_ticks()
+                if time_now - invincible_timer > INVINCIBILITY_DURATION:
+                    invincible = False
 
             # Calculate score
             for i, pipe in enumerate(pipes):
@@ -135,11 +263,14 @@ def main() -> None:
                 pipe.draw(screen)
 
             draw_ground(screen, current_biome)
-            bird.draw(screen)
+            bird.draw(screen, invincible)  # Pass invincible flag for visual feedback
 
             # Draw score
             score_text = font.render(f"Score: {score}", True, (255, 255, 255))
             screen.blit(score_text, (10, 10))
+            
+            # Draw lives
+            draw_lives(screen, lives)
 
         elif game_state == "game_over":
             # Draw all pipes and bird for game over state
