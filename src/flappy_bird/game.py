@@ -2,9 +2,11 @@
 
 import pygame
 import sys
+import random
 from typing import List, Any
 from flappy_bird.bird import Bird
-from flappy_bird.pipe import Pipe
+from flappy_bird.pipe import Pipe, HalfPipe
+from flappy_bird.heart import Heart
 from flappy_bird.graphics import draw_background_elements, draw_ground, draw_start_screen, draw_game_over_screen
 from flappy_bird.sounds import hit_sound, point_sound
 from flappy_bird.constants import BIOMES, BIOME_INTERVAL, PIPE_FREQUENCY, BASE_PIPE_SPEED, DIFFICULTY_INCREMENT, SCREEN_WIDTH, GROUND_HEIGHT, SCREEN_HEIGHT
@@ -150,6 +152,17 @@ def main() -> None:
     FALL_DAMAGE_THRESHOLD: float = 100  # Minimum fall distance to take damage
     MAX_FALL_DAMAGE: float = 3.0  # Maximum damage from a single fall
 
+    # Heart spawning system
+    hearts: List[Heart] = []
+    last_heart: int = pygame.time.get_ticks()
+    HEART_FREQUENCY: int = 15000  # Spawn a heart every 15 seconds (milliseconds)
+    HEART_HEAL_AMOUNT: float = 0.5  # Each heart restores 0.5 hearts (half a heart)
+
+    # Half pipe spawning system
+    half_pipes: List[HalfPipe] = []
+    HALF_PIPE_SCORE_THRESHOLD: int = 20  # Half pipes start spawning after score 20
+    next_half_pipe_time: int = 0  # Time when next half pipe should spawn
+
     running: bool = True
     while running:
         # Event handling
@@ -166,10 +179,14 @@ def main() -> None:
                         # Restart the game
                         bird = Bird()
                         pipes = []
+                        hearts = []
+                        half_pipes = []
                         score = 0
                         lives = 3.0  # Reset lives
                         max_height = SCREEN_HEIGHT // 2  # Reset max height tracking
                         last_pipe = pygame.time.get_ticks()
+                        last_heart = pygame.time.get_ticks()
+                        next_half_pipe_time = 0
                         invincible = False
                         invincible_timer = 0
                         game_state = "playing"
@@ -177,10 +194,14 @@ def main() -> None:
                     # Restart the game
                     bird = Bird()
                     pipes = []
+                    hearts = []
+                    half_pipes = []
                     score = 0
                     lives = 3.0  # Reset lives
                     max_height = SCREEN_HEIGHT // 2  # Reset max height tracking
                     last_pipe = pygame.time.get_ticks()
+                    last_heart = pygame.time.get_ticks()
+                    next_half_pipe_time = 0
                     invincible = False
                     invincible_timer = 0
                     game_state = "playing"
@@ -211,14 +232,108 @@ def main() -> None:
             # Generate new pipes with current biome colors
             time_now = pygame.time.get_ticks()
             if time_now - last_pipe > PIPE_FREQUENCY:
-                pipes.append(Pipe(biome_colors=current_biome))
+                # After score 40, 50% of pipes will be moving pipes
+                is_moving = score >= 40 and random.random() < 0.5
+                pipes.append(Pipe(biome_colors=current_biome, moving=is_moving))
                 last_pipe = time_now
+                
+                # After score 20, schedule a half pipe to spawn exactly midway
+                if score >= HALF_PIPE_SCORE_THRESHOLD and random.random() < 0.5:
+                    # Schedule half pipe to spawn midway between this and next regular pipe
+                    next_half_pipe_time = time_now + (PIPE_FREQUENCY // 2)
+            
+            # Spawn scheduled half pipe at the midway point
+            time_now = pygame.time.get_ticks()
+            if score >= HALF_PIPE_SCORE_THRESHOLD and time_now >= next_half_pipe_time and next_half_pipe_time > 0:
+                # Randomly choose top or bottom position
+                position = random.choice([HalfPipe.TOP, HalfPipe.BOTTOM])
+                half_pipe_height = 200
+                
+                half_pipes.append(HalfPipe(
+                    biome_colors=current_biome,
+                    position=position,
+                    height=half_pipe_height
+                ))
+                next_half_pipe_time = 0  # Reset scheduled spawn
+
+
+            # Generate hearts periodically
+            time_now = pygame.time.get_ticks()
+            if time_now - last_heart > HEART_FREQUENCY:
+                # Spawn heart at a safe height that avoids pipes
+                # Find gaps between pipes where heart can spawn safely
+                min_y = 100
+                max_y = SCREEN_HEIGHT - GROUND_HEIGHT - 100
+                heart_y = random.uniform(min_y, max_y)
+                
+                # Check if spawn position conflicts with any existing pipes
+                # Only spawn if heart won't appear inside or too close to a pipe
+                safe_to_spawn = True
+                heart_spawn_x = SCREEN_WIDTH + 50
+                for pipe in pipes:
+                    # Check if pipe is within spawn area (next 200 pixels)
+                    if pipe.x < heart_spawn_x + 200 and pipe.x + 60 > heart_spawn_x - 50:
+                        # Pipe is in the spawn zone, check if heart would be in the gap
+                        pipe_top_y = pipe.top_pipe.height
+                        pipe_bottom_y = pipe.bottom_pipe.y
+                        # Heart needs to be in the gap with some margin
+                        margin = 50  # Extra safety margin
+                        if not (pipe_top_y + margin < heart_y < pipe_bottom_y - margin):
+                            safe_to_spawn = False
+                            break
+                
+                if safe_to_spawn:
+                    hearts.append(Heart(SCREEN_WIDTH + 50, heart_y))
+                    last_heart = time_now
 
             # Update pipes and remove off-screen pipes
             for pipe in pipes[:]:
                 pipe.update(current_pipe_speed)
                 if pipe.x < -60:  # Pipe is off screen
                     pipes.remove(pipe)
+
+            # Update half pipes and remove off-screen half pipes
+            for half_pipe in half_pipes[:]:
+                half_pipe.update(current_pipe_speed)
+                if half_pipe.is_off_screen():
+                    half_pipes.remove(half_pipe)
+
+            # Check collision with half pipes (only if not invincible)
+            if not invincible:
+                for half_pipe in half_pipes[:]:
+                    if half_pipe.collide(bird):
+                        hit_sound.play()
+                        # Calculate fall damage
+                        fall_distance = bird.y - max_height
+                        if fall_distance > FALL_DAMAGE_THRESHOLD:
+                            damage = min(int(fall_distance / 100) * 0.5 + 0.5, MAX_FALL_DAMAGE)
+                        else:
+                            damage = 0.5
+
+                        lives -= damage
+                        if lives <= 0:
+                            game_state = "game_over"
+                        else:
+                            invincible = True
+                            invincible_timer = pygame.time.get_ticks()
+                            bird.y = SCREEN_HEIGHT // 2
+                            bird.velocity = 0
+                            max_height = bird.y
+                        break
+
+            # Update hearts and remove collected/off-screen hearts
+            for heart in hearts[:]:
+                heart.update(current_pipe_speed)
+                if heart.is_off_screen():
+                    hearts.remove(heart)
+                elif not heart.collected:
+                    # Check collision with bird for collection
+                    heart_rect = heart.get_rect()
+                    bird_mask = bird.get_mask()
+                    if bird_mask.colliderect(heart_rect):
+                        heart.collected = True
+                        lives = min(lives + HEART_HEAL_AMOUNT, 3.0)  # Heal but don't exceed max
+                        hearts.remove(heart)
 
             # Check for collisions (only if not invincible)
             if not invincible and check_collision(bird, pipes):
@@ -262,6 +377,14 @@ def main() -> None:
             for pipe in pipes:
                 pipe.draw(screen)
 
+            # Draw half pipes
+            for half_pipe in half_pipes:
+                half_pipe.draw(screen)
+
+            # Draw hearts
+            for heart in hearts:
+                heart.draw(screen)
+
             draw_ground(screen, current_biome)
             bird.draw(screen, invincible)  # Pass invincible flag for visual feedback
 
@@ -279,6 +402,12 @@ def main() -> None:
             draw_background_elements(screen, current_biome, score, pygame.time.get_ticks())
             for pipe in pipes:
                 pipe.draw(screen)
+            # Draw half pipes
+            for half_pipe in half_pipes:
+                half_pipe.draw(screen)
+            # Draw hearts (they remain visible in game over)
+            for heart in hearts:
+                heart.draw(screen)
             draw_ground(screen, current_biome)
             bird.draw(screen)
 
